@@ -19,10 +19,6 @@ pipeline {
                         echo "Artifact not created."
                         exit /b 1
                     )
-
-                    REM Remove the virtual environment
-                    call venv\\Scripts\\deactivate
-                    rmdir /s /q venv
                 """
             }
         }
@@ -43,6 +39,16 @@ pipeline {
                     junit 'results.xml'
                 }
             }
+        }
+    }
+    post {
+        always {
+            bat """
+                REM Deactivate the virtual environment
+                call venv\\Scripts\\deactivate
+                REM Optionally remove the virtual environment directory
+                rmdir /s /q venv
+            """
         }
     }
 }
