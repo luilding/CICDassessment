@@ -8,10 +8,11 @@ pipeline {
                     python -m venv venv
                     call venv\\Scripts\\activate
                     pip install --upgrade pip
-                    pip install numpy opencv-python matplotlib  // Install required libraries
+                    pip install numpy opencv-python matplotlib
+                    
                     python CVscript.py
 
-                    // Archive the generated image file
+                    REM Archive the generated image file
                     if exist "SIFT keypoints.png" (
                         echo "Artifact created successfully."
                         copy "SIFT keypoints.png" "%WORKSPACE%\\SIFT keypoints.png"
@@ -20,7 +21,7 @@ pipeline {
                         exit /b 1
                     )
 
-                    //Remove the virtual environment
+                    REM Remove the virtual environment
                     call venv\\Scripts\\deactivate
                     rmdir /s /q venv
                 """
