@@ -8,7 +8,7 @@ pipeline {
                     python -m venv venv
                     call venv\\Scripts\\activate
                     pip install --upgrade pip
-                    pip install numpy opencv-python matplotlib pytest pylint flake8 bandit
+                    pip install -r requirements.txt
                     
                     python CVscript.py
                 """
