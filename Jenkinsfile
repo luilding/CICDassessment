@@ -8,7 +8,7 @@ pipeline {
                     python -m venv venv
                     call venv\\Scripts\\activate
                     pip install --upgrade pip
-                    pip install numpy opencv-python matplotlib
+                    pip install numpy opencv-python matplotlib pytest
                     
                     python CVscript.py
 
@@ -29,6 +29,19 @@ pipeline {
         stage('Archive Artifact') {
             steps {
                 archiveArtifacts artifacts: 'SIFT keypoints.png', allowEmptyArchive: false
+            }
+        }
+        stage('Test') {
+            steps {
+                bat """
+                    call venv\\Scripts\\activate
+                    pytest --junitxml=results.xml
+                """
+            }
+            post {
+                always {
+                    junit 'results.xml'
+                }
             }
         }
     }
