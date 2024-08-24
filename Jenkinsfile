@@ -12,10 +12,9 @@ pipeline {
                     
                     python CVscript.py
 
-                    REM Archive the generated image file
+                    REM Check if the artifact was created
                     if exist "SIFT keypoints.png" (
                         echo "Artifact created successfully."
-                        copy "SIFT keypoints.png" "%WORKSPACE%\\SIFT keypoints.png"
                     ) else (
                         echo "Artifact not created."
                         exit /b 1
@@ -25,6 +24,11 @@ pipeline {
                     call venv\\Scripts\\deactivate
                     rmdir /s /q venv
                 """
+            }
+        }
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts artifacts: 'SIFT keypoints.png', allowEmptyArchive: false
             }
         }
     }
