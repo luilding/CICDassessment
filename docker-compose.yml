@@ -5,6 +5,4 @@ services:
     container_name: comp_v_app
     volumes:
       - .:/app
-    ports:
-      - "8000:8000"
     command: python CVscript.py
