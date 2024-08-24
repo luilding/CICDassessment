@@ -3,6 +3,4 @@ services:
   app:
     build: .
     container_name: comp_v_app
-    volumes:
-      - .:/app
     command: python CVscript.py
