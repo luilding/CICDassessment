@@ -47,6 +47,14 @@ pipeline {
                 }
             }
         }
+        stage('Docker Build') {
+            steps {
+                bat """
+                    docker-compose down || exit 0
+                    docker-compose up --build
+                """
+            }
+        }
     }
     post {
         always {
