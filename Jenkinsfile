@@ -72,27 +72,29 @@ pipeline {
                 }
             }
         }
-stage('Monitoring and Alerting') {
-    steps {
-        datadogServiceChecks(
-            serviceCheckNames: ['Mem load is high on host', 'CPU load is high', 'CPU idle is below 30%'], 
-            threshold: 'Alert'
-        )
+        stage('Monitoring and Alerting') {
+            steps {
+                datadogServiceChecks(
+                    serviceCheckNames: ['Mem load is high on host', 'CPU load is high', 'CPU idle is below 30%'], 
+                    threshold: 'Alert'
+                )
+            }
+        }
     }
-}
-post {
-    always {
-        bat """
-            REM Deactivate the virtual environment
-            call venv\\Scripts\\deactivate
-            REM Optionally remove the virtual environment directory
-            rmdir /s /q venv
-        """
-    }
-    failure {
-        echo 'Pipeline failed. Notifying team...'
-        mail to: 'lguilding@deakin.edu.au',
-             subject: "Jenkins Build Failed: ${env.JOB_NAME}",
-             body: "The build failed due to triggered monitors in Datadog."
+    post {
+        always {
+            bat """
+                REM Deactivate the virtual environment
+                call venv\\Scripts\\deactivate
+                REM Optionally remove the virtual environment directory
+                rmdir /s /q venv
+            """
+        }
+        failure {
+            echo 'Pipeline failed. Notifying team...'
+            mail to: 'lguilding@deakin.edu.au',
+                 subject: "Jenkins Build Failed: ${env.JOB_NAME}",
+                 body: "The build failed due to triggered monitors in Datadog."
+        }
     }
 }
