@@ -69,7 +69,7 @@ pipeline {
                     returnStdout: true
                 ).trim()
     
-                if (activeDeployment) {
+                if (activeDeployment && activeDeployment != 'None') {
                     echo "An active deployment is already in progress: ${activeDeployment}. Continuing with the current deployment."
                 } else {
                     echo "No active deployment found. Creating a new deployment."
@@ -93,13 +93,17 @@ pipeline {
                         """,
                         returnStdout: true
                     ).trim()
+                    
+                    if (response.startsWith("{") && response.endsWith("}")) {
+                        def monitors = readJSON(text: response)
+                        def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
         
-                    def monitors = readJSON(text: response)
-                    def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
-        
-                    if (alertingMonitors) {
-                        def monitorNames = alertingMonitors.collect { it.name }.join(", ")
-                        error "Failing build due to triggered Datadog monitors: ${monitorNames}"
+                        if (alertingMonitors) {
+                            def monitorNames = alertingMonitors.collect { it.name }.join(", ")
+                            error "Failing build due to triggered Datadog monitors: ${monitorNames}"
+                        }
+                    } else {
+                        error "Received invalid JSON response from Datadog API: ${response}"
                     }
                 }
             }
