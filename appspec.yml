@@ -1,13 +1,14 @@
 version: 0.0
 os: linux
 files:
-  - source: /
+  - source: CVscript.py
     destination: /opt/MyApp
-permissions:
-  - object: /opt/MyApp/scripts/run_script.sh
-    mode: 755
+  - source: empire.jpg
+    destination: /opt/MyApp
+  - source: scripts/run_script.sh
+    destination: /opt/MyApp/scripts
 hooks:
   ApplicationStart:
-    - location: scripts/run_script.sh
+    - location: /opt/MyApp/scripts/run_script.sh
       timeout: 300
       runas: root
