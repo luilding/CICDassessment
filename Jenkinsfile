@@ -23,8 +23,7 @@ stage('Monitoring and Alerting') {
 
                 echo "Triggered Alerts:\n${alertDetails}"
                 
-                // Send an email alert with details of each monitor alert
-                mail to: 'team@example.com',
+                mail to: 'lguilding@deakin.edu.au',
                      subject: "Datadog Alerts: Issues Detected in Production",
                      body: "The following monitors have triggered alerts:\n\n${alertDetails}"
             } else {
