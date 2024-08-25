@@ -1,25 +1,25 @@
 pipeline {
     agent any
-
     environment {
         DATADOG_API_KEY = credentials('datadog_api_key')
         DATADOG_APPLICATION_KEY = credentials('datadog_application_key')
     }
-
     stages {
         stage('Release') {
             steps {
                 script {
                     def activeDeployment = bat(
-                        script: 'aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestDeploymentAttempted.deploymentId" --output text',
+                        script: '@echo off & aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestDeploymentAttempted.deploymentId" --output text',
                         returnStdout: true
                     ).trim()
     
                     if (activeDeployment && activeDeployment != 'None') {
                         echo "An active deployment is already in progress: ${activeDeployment}. Stopping it to start a new deployment."
-                        bat 'aws deploy stop-deployment --deployment-id ' + activeDeployment + ' --auto-rollback-enabled'
+                        bat "aws deploy stop-deployment --deployment-id ${activeDeployment} --auto-rollback-enabled"
+                    } else {
+                        echo "No active deployment found. Proceeding with new deployment."
                     }
-
+                    
                     echo "Creating a new deployment with the updated appspec.yml."
                     bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip -Force'
                     bat 'aws s3 cp my_application.zip s3://sit753bucket/my_application.zip'
@@ -27,12 +27,12 @@ pipeline {
                 }
             }
         }
-
         stage('Monitoring and Alerting') {
             steps {
                 script {
                     def response = bat(
                         script: """
+                            @echo off
                             curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" ^
                             -H "Content-Type: application/json" ^
                             -H "DD-API-KEY: %DATADOG_API_KEY%" ^
