@@ -94,12 +94,16 @@ pipeline {
                         returnStdout: true
                     ).trim()
                     
-                    // Check if response starts with "[" indicating a JSON array
+                    // Print the raw API response
+                    echo "Raw API Response:"
+                    echo response
+                    
+                    // Rest of your existing code...
                     if (response.startsWith("[") && response.endsWith("]")) {
                         try {
                             def monitors = readJSON(text: response)
                             def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
-        
+            
                             if (alertingMonitors) {
                                 def monitorNames = alertingMonitors.collect { it.name }.join(", ")
                                 error "Failing build due to triggered Datadog monitors: ${monitorNames}"
