@@ -8,30 +8,16 @@ pipeline {
         stage('Prepare Deployment Package') {
             steps {
                 script {
-                    // Ensure scripts directory exists
-                    bat 'if not exist scripts mkdir scripts'
-                    
-                    // Create the corrected run_script.sh in the scripts folder
+                    // Create the corrected run_script.sh
                     bat '''
                     @echo off
-                    (
-                    echo #!/bin/bash
-                    echo cd /opt/MyApp
-                    echo python3 CVscript.py
-                    ) > scripts\\run_script.sh
+                    echo #!/bin/bash > scripts\\run_script.sh
+                    echo cd /opt/MyApp >> scripts\\run_script.sh
+                    echo python3 CVscript.py >> scripts\\run_script.sh
                     '''
                     
-                    // Convert to Unix line endings
-                    bat 'powershell -Command "(Get-Content scripts\\run_script.sh) -replace \"`r`n\", \"`n\" | Set-Content -NoNewline scripts\\run_script.sh"'
-                    
                     echo "Creating deployment package"
-                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts -DestinationPath my_application.zip -Force'
-                    
-                    // Verify the contents of the zip file
-                    bat 'powershell Expand-Archive -Path my_application.zip -DestinationPath temp_extract -Force'
-                    bat 'dir /s temp_extract'
-                    bat 'type temp_extract\\scripts\\run_script.sh'
-                    bat 'rmdir /s /q temp_extract'
+                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts/run_script.sh -DestinationPath my_application.zip -Force'
                 }
             }
         }
