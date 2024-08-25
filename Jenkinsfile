@@ -11,13 +11,14 @@ pipeline {
                     // Create the corrected run_script.sh
                     bat '''
                     @echo off
+                    mkdir scripts
                     echo #!/bin/bash > scripts\\run_script.sh
                     echo cd /opt/MyApp >> scripts\\run_script.sh
                     echo python3 CVscript.py >> scripts\\run_script.sh
                     '''
                     
                     echo "Creating deployment package"
-                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts/run_script.sh -DestinationPath my_application.zip -Force'
+                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts -DestinationPath my_application.zip -Force'
                 }
             }
         }
