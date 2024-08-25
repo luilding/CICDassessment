@@ -94,16 +94,21 @@ pipeline {
                         returnStdout: true
                     ).trim()
                     
-                    if (response.startsWith("{") && response.endsWith("}")) {
-                        def monitors = readJSON(text: response)
-                        def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
+                    // Check if response starts with "[" indicating a JSON array
+                    if (response.startsWith("[") && response.endsWith("]")) {
+                        try {
+                            def monitors = readJSON(text: response)
+                            def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
         
-                        if (alertingMonitors) {
-                            def monitorNames = alertingMonitors.collect { it.name }.join(", ")
-                            error "Failing build due to triggered Datadog monitors: ${monitorNames}"
+                            if (alertingMonitors) {
+                                def monitorNames = alertingMonitors.collect { it.name }.join(", ")
+                                error "Failing build due to triggered Datadog monitors: ${monitorNames}"
+                            }
+                        } catch (e) {
+                            error "Failed to parse JSON response: ${e.message}"
                         }
                     } else {
-                        error "Received invalid JSON response from Datadog API: ${response}"
+                        error "Received unexpected response format from Datadog API."
                     }
                 }
             }
