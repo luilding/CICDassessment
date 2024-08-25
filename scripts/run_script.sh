@@ -1,3 +1,3 @@
-@echo off
-cd C:\MyApp
-python CVscript.py
+set +x
+cd /opt/MyApp
+python3 CVscript.py
