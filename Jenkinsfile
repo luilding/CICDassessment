@@ -75,11 +75,11 @@ pipeline {
         stage('Monitoring and Alerting') {
             steps {
                 script {
-                    if (readJSON(text: sh(script: """
-                        curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" \
-                        -H "Content-Type: application/json" \
-                        -H "DD-API-KEY: ${env.DATADOG_API_KEY}" \
-                        -H "DD-APPLICATION-KEY: ${env.DATADOG_APPLICATION_KEY}"
+                    if (readJSON(text: bat(script: """
+                        curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" ^
+                        -H "Content-Type: application/json" ^
+                        -H "DD-API-KEY: %DATADOG_API_KEY%" ^
+                        -H "DD-APPLICATION-KEY: %DATADOG_APPLICATION_KEY%"
                     """, returnStdout: true).trim()).findAll { it.overall_state == 'Alert' }) {
                         error "Failing build due to triggered Datadog monitors."
                     }
