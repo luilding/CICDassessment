@@ -61,9 +61,7 @@ pipeline {
                 script {
                     bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip -Force'
 
-
-                    bat 'aws deploy create-deployment --application-name SIT753 --deployment-group-name SIT753deploymentgroup --file-exists-behavior OVERWRITE --file my_application.zip'
-                }
+                    bat 'aws deploy create-deployment --application-name SIT753 --deployment-group-name SIT753deploymentgroup --file-exists-behavior OVERWRITE --revision location=local,filePath=my_application.zip'                }
             }
         }
     }
