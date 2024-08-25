@@ -61,18 +61,10 @@ pipeline {
                 """
             }
         }
-    stage('Release') {
-        steps {
-            script {
-                def activeDeployment = bat(
-                    script: 'aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestDeploymentAttempted.deploymentId" --output text',
-                    returnStdout: true
-                ).trim()
-    
-                if (activeDeployment && activeDeployment != 'None') {
-                    echo "An active deployment is already in progress: ${activeDeployment}. Continuing with the current deployment."
-                } else {
-                    echo "No active deployment found. Creating a new deployment."
+        stage('Release') {
+            steps {
+                script {
+                    echo "Creating a new deployment with the updated appspec.yml."
                     bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip -Force'
                     bat 'aws s3 cp my_application.zip s3://sit753bucket/my_application.zip'
                     bat 'aws deploy create-deployment --application-name SIT753 --deployment-group-name SIT753deploymentgroup --s3-location bucket=sit753bucket,bundleType=zip,key=my_application.zip --file-exists-behavior OVERWRITE'
