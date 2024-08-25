@@ -1,0 +1,12 @@
+version: 0.0
+os: windows
+files:
+  - source: CVscript.py
+    destination: C:\Deployments\MyApp
+  - source: empire.jpg
+    destination: C:\Deployments\MyApp
+hooks:
+  ApplicationStart:
+    - location: scripts\run_script.bat
+      timeout: 300
+      runas: Administrator
