@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        DATADOG_API_KEY = credentials('datadog_api_key')
+        DATADOG_APPLICATION_KEY = credentials('datadog_application_key')
+    }
+
     stages {
         stage('Build') {
             steps {
@@ -67,6 +72,25 @@ pipeline {
                 }
             }
         }
+        stage('Monitoring and Alerting') {
+            steps {
+                script {
+
+                    def monitors = sh(script: """
+                        curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" \
+                        -H "Content-Type: application/json" \
+                        -H "DD-API-KEY: ${env.DATADOG_API_KEY}" \
+                        -H "DD-APPLICATION-KEY: ${env.DATADOG_APPLICATION_KEY}"
+                    """, returnStdout: true).trim()
+
+                    def alerts = readJSON(text: monitors).findAll { it.overall_state == 'Alert' }
+
+                    if (alerts) {
+                        error "Failing build: ${alerts.collect { it.name }.join(', ')}"
+                    }
+                }
+            }
+        }
     } 
     post {
         always {
@@ -79,6 +103,9 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed. Notifying team...'
+            mail to: 'lguilding@deakin.edu.au',
+                 subject: "Jenkins Build Failed: ${env.JOB_NAME}",
+                 body: "The build failed due to triggered monitors in Datadog."
         }
     } 
 }
