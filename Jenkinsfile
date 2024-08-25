@@ -5,17 +5,6 @@ pipeline {
         DATADOG_API_KEY = credentials('datadog_api_key')
         DATADOG_APPLICATION_KEY = credentials('datadog_application_key')
     }
-
-    stages {
-       
-pipeline {
-    agent any
-
-    environment {
-        DATADOG_API_KEY = credentials('datadog_api_key')
-        DATADOG_APPLICATION_KEY = credentials('datadog_application_key')
-    }
-
     stages {
         stage('Monitoring and Alerting') {
             steps {
