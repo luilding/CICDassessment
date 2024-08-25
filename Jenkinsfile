@@ -72,35 +72,27 @@ pipeline {
                 }
             }
         }
-        stage('Monitoring and Alerting') {
-            steps {
-                script {
-                    if (readJSON(text: bat(script: """
-                        curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" ^
-                        -H "Content-Type: application/json" ^
-                        -H "DD-API-KEY: %DATADOG_API_KEY%" ^
-                        -H "DD-APPLICATION-KEY: %DATADOG_APPLICATION_KEY%"
-                    """, returnStdout: true).trim()).findAll { it.overall_state == 'Alert' }) {
-                        error "Failing build due to triggered Datadog monitors."
-                    }
-                }
-            }
-        }
+stage('Monitoring and Alerting') {
+    steps {
+        datadogServiceChecks(
+            serviceCheckNames: ['Mem load is high on host', 'CPU load is high', 'CPU idle is below 30%'], 
+            threshold: 'Alert'
+        )
     }
-    post {
-        always {
-            bat """
-                REM Deactivate the virtual environment
-                call venv\\Scripts\\deactivate
-                REM Optionally remove the virtual environment directory
-                rmdir /s /q venv
-            """
-        }
-        failure {
-            echo 'Pipeline failed. Notifying team...'
-            mail to: 'lguilding@deakin.edu.au',
-                 subject: "Jenkins Build Failed: ${env.JOB_NAME}",
-                 body: "The build failed due to triggered monitors in Datadog."
-        }
+}
+post {
+    always {
+        bat """
+            REM Deactivate the virtual environment
+            call venv\\Scripts\\deactivate
+            REM Optionally remove the virtual environment directory
+            rmdir /s /q venv
+        """
+    }
+    failure {
+        echo 'Pipeline failed. Notifying team...'
+        mail to: 'lguilding@deakin.edu.au',
+             subject: "Jenkins Build Failed: ${env.JOB_NAME}",
+             body: "The build failed due to triggered monitors in Datadog."
     }
 }
