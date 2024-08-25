@@ -64,9 +64,10 @@ pipeline {
                     bat 'aws s3 cp my_application.zip s3://sit753bucket/my_application.zip'
 
                     bat 'aws deploy create-deployment --application-name SIT753 --deployment-group-name SIT753deploymentgroup --s3-location bucket=sit753bucket,bundleType=zip,key=my_application.zip --file-exists-behavior OVERWRITE'
+                }
             }
         }
-    }
+    } 
     post {
         always {
             bat """
@@ -79,5 +80,5 @@ pipeline {
         failure {
             echo 'Pipeline failed. Notifying team...'
         }
-    }
+    } 
 }
