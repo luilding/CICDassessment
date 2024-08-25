@@ -59,7 +59,7 @@ pipeline {
         stage('Release') {
             steps {
                 script {
-                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip'
+                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip -Force'
 
                     bat 'aws s3 cp my_application.zip s3://YourBucketName/my_application.zip'
 
@@ -78,7 +78,7 @@ pipeline {
             """
         }
         failure {
-            echo 'Pipeline failed.'
+            echo 'Pipeline failed. Notifying team...'
         }
     }
 }
