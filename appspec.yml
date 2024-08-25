@@ -9,4 +9,4 @@ hooks:
   ApplicationStart:
     - location: scripts/run_script.sh
       timeout: 300
-      runas: Administrator
+      runas: root
