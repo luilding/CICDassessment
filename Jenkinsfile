@@ -7,65 +7,6 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
-            steps {
-                bat """
-                    python -m venv venv
-                    call venv\\Scripts\\activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    
-                    python CVscript.py
-                """
-            }
-        }
-
-        stage('Archive Artifact') {
-            steps {
-                archiveArtifacts artifacts: 'SIFT keypoints.png', allowEmptyArchive: false
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat """
-                    call venv\\Scripts\\activate
-                    pytest --junitxml=results.xml
-                """
-            }
-            post {
-                always {
-                    junit 'results.xml'
-                }
-            }
-        }
-
-        stage('Code Quality Analysis') {
-            steps {
-                bat """
-                    call venv\\Scripts\\activate
-                    pylint CVscript.py > pylint_report.txt || exit 0
-                    flake8 --output-file=flake8_report.txt || exit 0
-                    bandit -r . -f txt -o bandit_report.txt || exit 0
-                """
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: '*.txt', allowEmptyArchive: false
-                }
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                bat """
-                    docker-compose down || exit 0
-                    docker rm -f comp_v_app || exit 0 
-                    docker-compose up --build
-                """
-            }
-        }
-
         stage('Release') {
             steps {
                 script {
