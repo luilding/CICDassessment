@@ -61,26 +61,26 @@ pipeline {
                 """
             }
         }
-        stage('Release') {
-            steps {
-                script {
-                    def deploymentId = bat(
-                        script: '''
-                            aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestSuccessfulDeployment.deploymentId" --output text
-                        ''',
-                        returnStdout: true
-                    ).trim()
-        
-                    if (deploymentId && deploymentId != 'None') {
-                        bat "aws deploy stop-deployment --deployment-id ${deploymentId} --auto-rollback-enabled"
-                    }
-        
+    stage('Release') {
+        steps {
+            script {
+                def activeDeployment = bat(
+                    script: 'aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestDeploymentAttempted.deploymentId" --output text',
+                    returnStdout: true
+                ).trim()
+    
+                if (activeDeployment) {
+                    echo "An active deployment is already in progress: ${activeDeployment}. Continuing with the current deployment."
+                } else {
+                    echo "No active deployment found. Creating a new deployment."
                     bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip -Force'
                     bat 'aws s3 cp my_application.zip s3://sit753bucket/my_application.zip'
                     bat 'aws deploy create-deployment --application-name SIT753 --deployment-group-name SIT753deploymentgroup --s3-location bucket=sit753bucket,bundleType=zip,key=my_application.zip --file-exists-behavior OVERWRITE'
                 }
             }
         }
+    }
+
         stage('Monitoring and Alerting') {
             steps {
                 script {
