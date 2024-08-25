@@ -64,13 +64,13 @@ pipeline {
         stage('Release') {
             steps {
                 script {
-                    def activeDeployment = bat(
-                        script: 'aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestSuccessfulDeployment.deploymentId"',
+                    def deploymentId = bat(
+                        script: 'aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestSuccessfulDeployment.deploymentId" --output text',
                         returnStdout: true
                     ).trim()
         
-                    if (activeDeployment) {
-                        bat "aws deploy stop-deployment --deployment-id ${activeDeployment} --auto-rollback-enabled"
+                    if (deploymentId) {
+                        bat "aws deploy stop-deployment --deployment-id ${deploymentId} --auto-rollback-enabled"
                     }
         
                     bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip -Force'
