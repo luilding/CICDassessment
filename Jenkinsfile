@@ -97,14 +97,22 @@ pipeline {
                     echo "Raw API Response:"
                     echo response
                     
-                    def monitors = readJSON(text: response)
-                    def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
+                    response = response.replaceAll("(?m)^\\s*\$[\n\r]{1,}", "")
+                    
+                    try {
+                        def monitors = new groovy.json.JsonSlurper().parseText(response)
+                        def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
         
-                    if (alertingMonitors) {
-                        def monitorNames = alertingMonitors.collect { it.name }.join(", ")
-                        error "Failing build due to triggered Datadog monitors: ${monitorNames}"
-                    } else {
-                        echo "No alerting monitors found."
+                        if (alertingMonitors) {
+                            def monitorNames = alertingMonitors.collect { it.name }.join(", ")
+                            error "Failing build due to triggered Datadog monitors: ${monitorNames}"
+                        } else {
+                            echo "No alerting monitors found."
+                        }
+                    } catch (Exception e) {
+                        echo "Error parsing JSON: ${e.message}"
+                        echo "Raw response: ${response}"
+                        error "Failed to process Datadog API response"
                     }
                 }
             }
