@@ -2,11 +2,11 @@ version: 0.0
 os: linux
 files:
   - source: CVscript.py
-    destination: C:\Deployments\MyApp
+    destination: /opt/MyApp
   - source: empire.jpg
-    destination: C:\Deployments\MyApp
+    destination: /opt/MyApp
 hooks:
   ApplicationStart:
-    - location: scripts\run_script.bat
+    - location: scripts/run_script.sh
       timeout: 300
       runas: Administrator
