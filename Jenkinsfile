@@ -94,25 +94,17 @@ pipeline {
                         returnStdout: true
                     ).trim()
                     
-                    // Print the raw API response
                     echo "Raw API Response:"
                     echo response
                     
-                    // Rest of your existing code...
-                    if (response.startsWith("[") && response.endsWith("]")) {
-                        try {
-                            def monitors = readJSON(text: response)
-                            def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
-            
-                            if (alertingMonitors) {
-                                def monitorNames = alertingMonitors.collect { it.name }.join(", ")
-                                error "Failing build due to triggered Datadog monitors: ${monitorNames}"
-                            }
-                        } catch (e) {
-                            error "Failed to parse JSON response: ${e.message}"
-                        }
+                    def monitors = readJSON(text: response)
+                    def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
+        
+                    if (alertingMonitors) {
+                        def monitorNames = alertingMonitors.collect { it.name }.join(", ")
+                        error "Failing build due to triggered Datadog monitors: ${monitorNames}"
                     } else {
-                        error "Received unexpected response format from Datadog API."
+                        echo "No alerting monitors found."
                     }
                 }
             }
