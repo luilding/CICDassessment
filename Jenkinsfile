@@ -56,6 +56,17 @@ pipeline {
                 """
             }
         }
+        stage('Release') {
+            steps {
+                script {
+                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip'
+
+                    bat 'aws s3 cp my_application.zip s3://YourBucketName/my_application.zip'
+
+                    bat 'aws deploy create-deployment --application-name YourAppName --deployment-group-name YourDeploymentGroup --s3-location bucket=YourBucketName,bundleType=zip,key=my_application.zip'
+                }
+            }
+        }
     }
     post {
         always {
@@ -65,6 +76,9 @@ pipeline {
                 REM Optionally remove the virtual environment directory
                 rmdir /s /q venv
             """
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
