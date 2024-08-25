@@ -8,7 +8,10 @@ pipeline {
         stage('Prepare Deployment Package') {
             steps {
                script {
-                    // Create the corrected run_script.sh
+                    // Ensure scripts directory exists
+                    bat 'if not exist scripts mkdir scripts'
+                    
+                    // Create the corrected run_script.sh in the scripts folder
                     bat '''
                     @echo off
                     (
@@ -19,10 +22,10 @@ pipeline {
                     '''
                     
                     // Convert to Unix line endings
-                    bat 'powershell -Command "(Get-Content scripts\\run_script.sh) | Set-Content -NoNewline scripts\\run_script.sh"'
+                    bat 'powershell -Command "(Get-Content scripts\\run_script.sh) | ForEach-Object { $_ -replace \"`r`n\", \"`n\" } | Set-Content -NoNewline scripts\\run_script.sh"'
                     
                     echo "Creating deployment package"
-                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\run_script.sh -DestinationPath my_application.zip -Force'
+                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts -DestinationPath my_application.zip -Force'
                     
                     // Verify the contents of the zip file
                     bat 'powershell Expand-Archive -Path my_application.zip -DestinationPath temp_extract -Force'
