@@ -75,23 +75,18 @@ pipeline {
         stage('Monitoring and Alerting') {
             steps {
                 script {
-
-                    def monitors = sh(script: """
+                    if (readJSON(text: sh(script: """
                         curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" \
                         -H "Content-Type: application/json" \
                         -H "DD-API-KEY: ${env.DATADOG_API_KEY}" \
                         -H "DD-APPLICATION-KEY: ${env.DATADOG_APPLICATION_KEY}"
-                    """, returnStdout: true).trim()
-
-                    def alerts = readJSON(text: monitors).findAll { it.overall_state == 'Alert' }
-
-                    if (alerts) {
-                        error "Failing build: ${alerts.collect { it.name }.join(', ')}"
+                    """, returnStdout: true).trim()).findAll { it.overall_state == 'Alert' }) {
+                        error "Failing build due to triggered Datadog monitors."
                     }
                 }
             }
         }
-    } 
+    }
     post {
         always {
             bat """
@@ -107,5 +102,5 @@ pipeline {
                  subject: "Jenkins Build Failed: ${env.JOB_NAME}",
                  body: "The build failed due to triggered monitors in Datadog."
         }
-    } 
+    }
 }
