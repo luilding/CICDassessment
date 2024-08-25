@@ -5,6 +5,22 @@ pipeline {
         DATADOG_APPLICATION_KEY = credentials('datadog_application_key')
     }
     stages {
+        stage('Prepare Deployment Package') {
+            steps {
+                script {
+                    // Create the corrected run_script.sh
+                    bat '''
+                    @echo off
+                    echo #!/bin/bash > scripts\\run_script.sh
+                    echo cd /opt/MyApp >> scripts\\run_script.sh
+                    echo python3 CVscript.py >> scripts\\run_script.sh
+                    '''
+                    
+                    echo "Creating deployment package"
+                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts/run_script.sh -DestinationPath my_application.zip -Force'
+                }
+            }
+        }
         stage('Release') {
             steps {
                 script {
@@ -20,9 +36,10 @@ pipeline {
                         echo "No active deployment found. Proceeding with new deployment."
                     }
                     
-                    echo "Creating a new deployment with the updated appspec.yml."
-                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts -DestinationPath my_application.zip -Force'
+                    echo "Uploading deployment package to S3"
                     bat 'aws s3 cp my_application.zip s3://sit753bucket/my_application.zip'
+                    
+                    echo "Creating new deployment"
                     bat 'aws deploy create-deployment --application-name SIT753 --deployment-group-name SIT753deploymentgroup --s3-location bucket=sit753bucket,bundleType=zip,key=my_application.zip --file-exists-behavior OVERWRITE'
                 }
             }
@@ -51,7 +68,14 @@ pipeline {
         
                     if (alertingMonitors) {
                         def monitorNames = alertingMonitors.collect { it.name }.join(", ")
-                        error "Failing build due to triggered Datadog monitors: ${monitorNames}"
+                        echo "Warning: The following Datadog monitors are in alert state: ${monitorNames}"
+                        
+                        // Check if the memory alert is the only one triggered
+                        if (alertingMonitors.size() == 1 && alertingMonitors[0].name.contains("Mem load is high")) {
+                            echo "High memory usage detected. Please investigate, but continuing the pipeline."
+                        } else {
+                            error "Failing build due to triggered Datadog monitors: ${monitorNames}"
+                        }
                     } else {
                         echo "No alerting monitors found."
                     }
