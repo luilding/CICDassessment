@@ -65,11 +65,13 @@ pipeline {
             steps {
                 script {
                     def deploymentId = bat(
-                        script: 'aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestSuccessfulDeployment.deploymentId" --output text',
+                        script: '''
+                            aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestSuccessfulDeployment.deploymentId" --output text
+                        ''',
                         returnStdout: true
                     ).trim()
         
-                    if (deploymentId) {
+                    if (deploymentId && deploymentId != 'None') {
                         bat "aws deploy stop-deployment --deployment-id ${deploymentId} --auto-rollback-enabled"
                     }
         
