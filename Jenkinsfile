@@ -19,11 +19,13 @@ pipeline {
                 """
             }
         }
+
         stage('Archive Artifact') {
             steps {
                 archiveArtifacts artifacts: 'SIFT keypoints.png', allowEmptyArchive: false
             }
         }
+
         stage('Test') {
             steps {
                 bat """
@@ -37,6 +39,7 @@ pipeline {
                 }
             }
         }
+
         stage('Code Quality Analysis') {
             steps {
                 bat """
@@ -52,6 +55,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Build') {
             steps {
                 bat """
@@ -61,9 +65,20 @@ pipeline {
                 """
             }
         }
+
         stage('Release') {
             steps {
                 script {
+                    def activeDeployment = bat(
+                        script: 'aws deploy get-deployment-group --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deploymentGroupInfo.latestDeploymentAttempted.deploymentId" --output text',
+                        returnStdout: true
+                    ).trim()
+    
+                    if (activeDeployment && activeDeployment != 'None') {
+                        echo "An active deployment is already in progress: ${activeDeployment}. Stopping it to start a new deployment."
+                        bat 'aws deploy stop-deployment --deployment-id ' + activeDeployment + ' --auto-rollback-enabled'
+                    }
+
                     echo "Creating a new deployment with the updated appspec.yml."
                     bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts\\* -DestinationPath my_application.zip -Force'
                     bat 'aws s3 cp my_application.zip s3://sit753bucket/my_application.zip'
@@ -71,7 +86,6 @@ pipeline {
                 }
             }
         }
-    }
 
         stage('Monitoring and Alerting') {
             steps {
