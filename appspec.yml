@@ -1,12 +1,8 @@
 version: 0.0
 os: linux
 files:
-  - source: CVscript.py
+  - source: /
     destination: /opt/MyApp
-  - source: empire.jpg
-    destination: /opt/MyApp
-  - source: scripts/run_script.sh
-    destination: /opt/MyApp/scripts
 permissions:
   - object: /opt/MyApp/scripts/run_script.sh
     mode: 755
