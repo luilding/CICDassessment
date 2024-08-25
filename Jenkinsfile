@@ -8,6 +8,15 @@ pipeline {
 
     stages {
        
+pipeline {
+    agent any
+
+    environment {
+        DATADOG_API_KEY = credentials('datadog_api_key')
+        DATADOG_APPLICATION_KEY = credentials('datadog_application_key')
+    }
+
+    stages {
         stage('Monitoring and Alerting') {
             steps {
                 script {
@@ -20,17 +29,25 @@ pipeline {
                         """,
                         returnStdout: true
                     ).trim()
-        
-                    echo "Raw API Response: ${response}"
-        
-                    def monitors = readJSON(text: response)
+                    
+                    echo "Raw API Response:"
+                    echo response
+                    
+                    def jsonResponse = response.readLines().last() // Get the last line, which should be the JSON
+                    
+                    def monitors = readJSON text: jsonResponse
                     def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
         
                     if (alertingMonitors) {
                         def alertDetails = alertingMonitors.collect { monitor ->
-                            return "Monitor Name: ${monitor.name}\nMessage: ${monitor.message}\nQuery: ${monitor.query}\nCurrent State: ${monitor.overall_state}"
+                            return """
+                            Monitor Name: ${monitor.name}
+                            Message: ${monitor.message}
+                            Query: ${monitor.query}
+                            Current State: ${monitor.overall_state}
+                            """
                         }.join("\n\n")
-        
+
                         echo "Triggered Alerts:\n${alertDetails}"
                         
                         // Send an email alert with details of each monitor alert
@@ -43,5 +60,8 @@ pipeline {
                 }
             }
         }
+    }
+}
+
     }
 }
