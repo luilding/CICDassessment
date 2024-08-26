@@ -4,6 +4,10 @@ files:
   - source: .
     destination: /opt/MyApp
 hooks:
+  BeforeInstall:
+    - location: scripts/set_permissions.sh
+      timeout: 300
+      runas: root
   ApplicationStart:
     - location: scripts/run_script.sh
       timeout: 300
