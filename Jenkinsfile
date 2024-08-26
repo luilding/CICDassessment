@@ -19,8 +19,8 @@ pipeline {
                 script {
                     // List the files to verify they exist
                     bat 'dir'
-                    // Compress files into a zip
-                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,run_script.sh,scripts\\* -DestinationPath my_application.zip -Force'
+                    // Compress files into a zip (without the non-existent scripts directory)
+                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,run_script.sh -DestinationPath my_application.zip -Force'
                     // Upload the zip to S3
                     bat 'aws s3 cp my_application.zip s3://sit753bucket/my_application.zip'
                     // Verify the S3 upload
