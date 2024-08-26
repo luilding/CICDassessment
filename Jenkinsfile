@@ -72,7 +72,7 @@ pipeline {
         stage('Monitoring and Alerting') {
             steps {
                 script {
-                    //Checking Datadog monitor views for any alerts in the prod env
+                    //Checking Datadog monitor views for any alerts in the env
                     def response = bat(
                         script: """
                             curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" ^
