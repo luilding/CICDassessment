@@ -4,3 +4,8 @@ services:
     build: .
     container_name: comp_v_app
     command: python CVscript.py
+    labels:
+      com.datadoghq.ad.checks: '{"docker_check": {"init_config":{},"instances":[{"min_collection_interval":5}]}}'
+      com.datadoghq.tags.service: "app"
+      com.datadoghq.tags.container: "comp_v_app"
+      com.datadoghq.tags.env: "test"
