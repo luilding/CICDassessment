@@ -10,11 +10,11 @@ pipeline {
     stages {
         stage('Deploy with Docker') {
             steps {
-                //Deploying the application into a Docker container
+                //Deploying the application into a Docker container in detached mode
                 bat """
                     docker-compose down || exit 0
                     docker rm -f comp_v_app || exit 0 
-                    docker-compose up --build
+                    docker-compose up --build -d
                 """
             }
         }
@@ -22,7 +22,7 @@ pipeline {
         stage('Monitoring and Alerting with Datadog') {
             steps {
                 script {
-                    //Checking Datadog monitor views for any alerts in the prod environment
+                    //Checking Datadog monitor views for any alerts related to the running Docker container
                     def response = bat(
                         script: """
                             curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" ^
