@@ -51,4 +51,4 @@ print("Number of detected keypoints: %d" % (len(kp)))
 
 cv.imwrite("SIFT keypoints.png", img_gray_kp)
 
-#time.sleep(600) 
+time.sleep(120) 
