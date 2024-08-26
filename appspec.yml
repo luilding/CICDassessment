@@ -1,12 +1,10 @@
 version: 0.0
 os: linux
 files:
-  - source: CVscript.py
-    destination: /opt/MyApp
-  - source: empire.jpg
-    destination: /opt/MyApp
-  - source: scripts/run_script.sh
+  - source: scripts
     destination: /opt/MyApp/scripts
+  - source: .
+    destination: /opt/MyApp
 hooks:
   ApplicationStart:
     - location: /opt/MyApp/scripts/run_script.sh
