@@ -67,7 +67,10 @@ pipeline {
                     docker-compose up --build -d
         
 
-                    docker exec -d comp_v_app bash -c "export SLEEP_TIME=600 && nohup python CVscript.py &"
+                    docker exec comp_v_app bash -c "export SLEEP_TIME=600 && nohup python CVscript.py &"
+        
+   
+                    docker exec -d comp_v_app tail -f /dev/null
                 """
             }
         }
