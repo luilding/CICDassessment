@@ -60,11 +60,14 @@ pipeline {
 
         stage('Deploy with Docker') {
             steps {
-                //Deploying the application into a Docker container in detached mode
+                // Set the sleep time for Docker execution
                 bat """
                     docker-compose down || exit 0
                     docker rm -f comp_v_app || exit 0 
                     docker-compose up --build -d
+        
+                    // Set the SLEEP_TIME environment variable in Docker container
+                    docker exec comp_v_app bash -c "export SLEEP_TIME=600 && python CVscript.py"
                 """
             }
         }
