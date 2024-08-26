@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
+import time
 
 img = cv.imread('empire.jpg')
 
@@ -49,3 +50,6 @@ plt.imshow(img_gray_kp)
 print("Number of detected keypoints: %d" % (len(kp)))
 
 cv.imwrite("SIFT keypoints.png", img_gray_kp)
+
+print("Processing complete. Keeping the container running for 5 minutes...")
+time.sleep(300) 
