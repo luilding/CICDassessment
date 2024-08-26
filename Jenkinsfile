@@ -4,7 +4,10 @@ pipeline {
         stage('Release') {
             steps {
                 script {
-                    // Package the application, including the scripts directory
+                    // Set the executable permission on run_script.sh using PowerShell
+                    bat 'powershell -Command "Set-ItemProperty -Path .\\scripts\\run_script.sh -Name IsReadOnly -Value $false"'
+                    
+                    // Archive all the necessary files into a zip file
                     bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts -DestinationPath my_application.zip -Force'
 
                     // Upload the packaged application to the specified S3 bucket
