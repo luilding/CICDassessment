@@ -28,5 +28,15 @@ pipeline {
                 }
             }
         }
+        stage('Deploy') {
+            steps {
+                script {
+                    // Start a new deployment
+                    bat '''
+                        aws deploy create-deployment --application-name YourApplicationName --deployment-group-name YourDeploymentGroupName --s3-location bucket=sit753bucket,key=my_application.zip,bundleType=zip --file-exists-behavior OVERWRITE
+                    '''
+                }
+            }
+        }
     }
 }
