@@ -4,12 +4,13 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Check and stop active deployments if any
-                    bat '''
-                        set "deploymentId="
-                        for /f %%i in ('aws deploy list-deployments --application-name SIT753 --deployment-group-name SIT753deploymentgroup --include-only-statuses InProgress --query "deployments[0]" --output text') do set deploymentId=%%i
-                        if not "%deploymentId%"=="None" aws deploy stop-deployment --deployment-id %deploymentId%
-                    '''
+                    // Check for active deployments and stop if any exist
+                    def activeDeployment = bat(script: 'aws deploy list-deployments --application-name SIT753 --deployment-group-name SIT753deploymentgroup --include-only-statuses InProgress --query "deployments[0]" --output text', returnStdout: true).trim()
+
+                    if (activeDeployment != "None") {
+                        echo "Stopping active deployment: ${activeDeployment}"
+                        bat "aws deploy stop-deployment --deployment-id ${activeDeployment}"
+                    }
 
                     // Compress the entire workspace to maintain folder structure
                     bat 'powershell Compress-Archive -Path * -DestinationPath my_application.zip -Force'
