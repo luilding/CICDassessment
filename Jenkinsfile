@@ -1,17 +1,10 @@
 pipeline {
     agent any
-
-    environment {
-        // To get sensitive details from Jenkins
-        DATADOG_API_KEY = credentials('datadog_api_key')
-        DATADOG_APPLICATION_KEY = credentials('datadog_application_key')
-    }
-
     stages {
-        stage('Release') {
+        stage('Deploy') {
             steps {
                 script {
-                    // Stopping any active deployments in AWS to avoid conflicts
+                    // Stop active deployments
                     bat '''
                         for /f "tokens=*" %%i in ('aws deploy list-deployments --application-name SIT753 --deployment-group-name SIT753deploymentgroup --include-only-statuses InProgress --query "deployments[0]" --output text') do (
                             if not "%%i"=="None" (
@@ -21,7 +14,7 @@ pipeline {
                         )
                     '''
                     
-                    // Create a new deployment in AWS CodeDeploy
+                    // Create new deployment
                     bat '''
                         aws deploy create-deployment ^
                         --application-name SIT753 ^
