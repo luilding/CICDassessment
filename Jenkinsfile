@@ -63,7 +63,7 @@ pipeline {
                 // Deploy the application into a Docker container in detached mode
                 bat """
                     docker-compose down || exit 0
-                    docker rm -f comp_v_app || exit 0 
+ 
                     docker-compose up --build -d
                 """
             }
