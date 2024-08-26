@@ -8,58 +8,7 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
-            steps {
-                //Setting up and starting a Python virtual environment as well as installing the script dependencies
-                bat """
-                    python -m venv venv
-                    call venv\\Scripts\\activate
-                    pip install --upgrade pip && pip install -r requirements.txt
-                    
-                    // Run the main script to build the application
-                    python CVscript.py
-                """
-                
-                //Archiving the build artifact
-                archiveArtifacts artifacts: 'SIFT keypoints.png', allowEmptyArchive: false
-            }
-        }
-
-        stage('Test') {
-            steps {
-                //Activating the virtual environment to run tests on the code, using python specifc pytest
-                bat """
-                    call venv\\Scripts\\activate
-                    pytest --junitxml=results.xml
-                """
-            }
-            post {
-                always {
-                    //Provide test results to Jenkins
-                    junit 'results.xml'
-                }
-            }
-        }
-
-        stage('Code Quality Analysis') {
-            steps {
-                //Runing python code quality tools and static analysis: pylint, flake8 and bandit
-                bat """
-                    call venv\\Scripts\\activate
-                    pylint CVscript.py > pylint_report.txt || exit 0
-                    flake8 --output-file=flake8_report.txt || exit 0
-                    bandit -r . -f txt -o bandit_report.txt || exit 0
-                """
-            }
-            post {
-                always {
-                    //Archiving the code quality reports
-                    archiveArtifacts artifacts: '*.txt', allowEmptyArchive: false
-                }
-            }
-        }
-
-        stage('Deploy') {
+        stage('Deploy with Docker') {
             steps {
                 //Deploying the application into a Docker container
                 bat """
@@ -70,32 +19,7 @@ pipeline {
             }
         }
 
-        stage('Release') {
-            steps {
-                script {
-                    //Stopping any active deployments in aws to avoid conflicts
-                    bat '''
-                        for /f "tokens=*" %%i in ('aws deploy list-deployments --application-name SIT753 --deployment-group-name SIT753deploymentgroup --include-only-statuses InProgress --query "deployments[0]" --output text') do (
-                            if not "%%i"=="None" (
-                                echo Stopping deployment: %%i
-                                aws deploy stop-deployment --deployment-id %%i
-                            )
-                        )
-                    '''
-                    
-                    //Create a new deployment in aws codedeploy
-                    bat '''
-                        aws deploy create-deployment ^
-                        --application-name SIT753 ^
-                        --deployment-group-name SIT753deploymentgroup ^
-                        --s3-location bucket=sit753bucket,bundleType=zip,key=my_application.zip ^
-                        --file-exists-behavior OVERWRITE
-                    '''
-                }
-            }
-        }
-
-        stage('Monitoring and Alerting') {
+        stage('Monitoring and Alerting with Datadog') {
             steps {
                 script {
                     //Checking Datadog monitor views for any alerts in the prod environment
