@@ -1,12 +1,10 @@
 version: 0.0
 os: linux
 files:
-  - source: scripts
-    destination: /opt/MyApp/scripts
   - source: .
     destination: /opt/MyApp
 hooks:
   ApplicationStart:
-    - location: /opt/MyApp/scripts/run_script.sh
+    - location: scripts/run_script.sh
       timeout: 300
       runas: root
