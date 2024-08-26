@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        //To get sensitive details from Jenkins
+        // To get sensitive details from Jenkins
         DATADOG_API_KEY = credentials('datadog_api_key')
         DATADOG_APPLICATION_KEY = credentials('datadog_application_key')
     }
@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                //Setting up and starting a Python virtual environment as well as installing the script dependencies
+                // Setting up and starting a Python virtual environment as well as installing the script dependencies
                 bat """
                     python -m venv venv
                     call venv\\Scripts\\activate
@@ -19,14 +19,14 @@ pipeline {
                     python CVscript.py
                 """
                 
-                //Archiving the build artifact
+                // Archiving the build artifact
                 archiveArtifacts artifacts: 'SIFT keypoints.png', allowEmptyArchive: false
             }
         }
 
         stage('Test') {
             steps {
-                //Activating the virtual environment to run tests on the code, using python specifc pytest
+                // Activating the virtual environment to run tests on the code, using python specific pytest
                 bat """
                     call venv\\Scripts\\activate
                     pytest --junitxml=results.xml
@@ -34,7 +34,7 @@ pipeline {
             }
             post {
                 always {
-                    //Provide test results to Jenkins
+                    // Provide test results to Jenkins
                     junit 'results.xml'
                 }
             }
@@ -42,7 +42,7 @@ pipeline {
 
         stage('Code Quality Analysis') {
             steps {
-                //Running python code quality tools and static analysis: pylint, flake8 and bandit
+                // Running python code quality tools and static analysis: pylint, flake8, and bandit
                 bat """
                     call venv\\Scripts\\activate
                     pylint CVscript.py > pylint_report.txt || exit 0
@@ -52,7 +52,7 @@ pipeline {
             }
             post {
                 always {
-                    //Archiving the code quality reports
+                    // Archiving the code quality reports
                     archiveArtifacts artifacts: '*.txt', allowEmptyArchive: false
                 }
             }
@@ -69,36 +69,10 @@ pipeline {
             }
         }
 
-
-        stage('Release') {
-            steps {
-                script {
-                    //Stopping any active deployments in aws to avoid conflicts
-                    bat '''
-                        for /f "tokens=*" %%i in ('aws deploy list-deployments --application-name SIT753 --deployment-group-name SIT753deploymentgroup --include-only-statuses InProgress --query "deployments[0]" --output text') do (
-                            if not "%%i"=="None" (
-                                echo Stopping deployment: %%i
-                                aws deploy stop-deployment --deployment-id %%i
-                            )
-                        )
-                    '''
-                    
-                    //Create a new deployment in aws codedeploy
-                    bat '''
-                        aws deploy create-deployment ^
-                        --application-name SIT753 ^
-                        --deployment-group-name SIT753deploymentgroup ^
-                        --s3-location bucket=sit753bucket,bundleType=zip,key=my_application.zip ^
-                        --file-exists-behavior OVERWRITE
-                    '''
-                }
-            }
-        }
-
         stage('Monitoring and Alerting') {
             steps {
                 script {
-                    //Checking Datadog monitor views for any alerts in the prod environment
+                    // Checking Datadog monitor views for any alerts in the prod environment
                     def response = bat(
                         script: """
                             curl -s -X GET "https://api.us5.datadoghq.com/api/v1/monitor" ^
@@ -112,14 +86,14 @@ pipeline {
                     echo "Raw API Response:"
                     echo response
                     
-                    //Parse the JSON response from Datadog API
+                    // Parse the JSON response from Datadog API
                     def jsonResponse = response.readLines().last() 
                     
-                    //Find monitors that are currently alerting
+                    // Find monitors that are currently alerting
                     def monitors = readJSON text: jsonResponse
                     def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
         
-                    //If any monitors are currently alerting, generate email notification including the alert details
+                    // If any monitors are currently alerting, generate email notification including the alert details
                     if (alertingMonitors) {
                         def alertDetails = alertingMonitors.collect { monitor ->
                             return """
@@ -132,12 +106,12 @@ pipeline {
 
                         echo "Triggered Alerts:\n${alertDetails}"
                         
-                        //Sending the email with details of the alerts
+                        // Sending the email with details of the alerts
                         mail to: 'lguilding@deakin.edu.au',
                              subject: "Datadog Alerts: Issues Detected in Production",
                              body: "The following monitors have triggered alerts:\n\n${alertDetails}"
                     } else {
-                        //If no alerts are found, log that it is fine
+                        // If no alerts are found, log that it is fine
                         echo "No alerting monitors found."
                     }
                 }
