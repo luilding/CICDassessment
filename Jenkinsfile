@@ -56,7 +56,7 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Deployment') {
             steps {
                 bat """
                     docker-compose down || exit 0
@@ -66,7 +66,7 @@ pipeline {
             }
         }
 
-        stage('Deployment') {
+        stage('Release') {
             steps {
                 script {
                     // Stop active deployments
