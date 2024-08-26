@@ -10,6 +10,6 @@ hooks:
       timeout: 300
       runas: root
   ApplicationStart:
-    - location: scripts/run_script.sh
+    - location: /opt/MyApp/scripts/run_script.sh
       timeout: 300
       runas: root
