@@ -1,15 +1,10 @@
 version: 0.0
 os: linux
 files:
-  - source: .
+  - source: /
     destination: /opt/MyApp
 hooks:
-  BeforeInstall:
-    - script: |
-        chmod +x /opt/MyApp/scripts/run_script.sh
-      timeout: 300
-      runas: root
   ApplicationStart:
-    - location: /opt/MyApp/scripts/run_script.sh
+    - location: scripts/run_script.sh
       timeout: 300
       runas: root
