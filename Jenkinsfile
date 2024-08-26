@@ -11,6 +11,8 @@ pipeline {
                     if (activeDeployment != "None" && !activeDeployment.isEmpty()) {
                         echo "Stopping active deployment: ${activeDeployment}"
                         bat "aws deploy stop-deployment --deployment-id ${activeDeployment}"
+                    } else {
+                        echo "No active deployment to stop."
                     }
 
                     // Compress the entire workspace to maintain folder structure
