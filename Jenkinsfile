@@ -16,13 +16,10 @@ pipeline {
                     pip install -r requirements.txt
                     
                     python CVscript.py
-                    
-                    REM Archive the build artifact, for example, a Python package or other output files
-                    python setup.py sdist  // Example command to create a source distribution if applicable
                 """
                 
                 // Archive the build artifact
-                archiveArtifacts artifacts: 'dist/*', allowEmptyArchive: false // Adjust the path based on your artifact
+                archiveArtifacts artifacts: 'SIFT keypoints.png', allowEmptyArchive: false
             }
         }
 
@@ -56,7 +53,7 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deployment') {
             steps {
                 bat """
                     docker-compose down || exit 0
