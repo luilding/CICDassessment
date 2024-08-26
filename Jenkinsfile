@@ -16,7 +16,6 @@ pipeline {
                     call venv\\Scripts\\activate
                     pip install --upgrade pip && pip install -r requirements.txt
                     
-                    // Run the main script to build the application
                     python CVscript.py
                 """
                 
