@@ -5,6 +5,7 @@ files:
     destination: /opt/MyApp
 hooks:
   ApplicationStart:
-    - location: run_script.sh
+    - location: /opt/MyApp/run_script.sh
       timeout: 300
       runas: root
+
