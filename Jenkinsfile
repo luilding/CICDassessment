@@ -60,17 +60,18 @@ pipeline {
 
         stage('Deploy with Docker') {
             steps {
-                // Set the sleep time for Docker execution and Set the SLEEP_TIME environment variable in Docker container
+                // Deploy the application into a Docker container and run the script in the background
                 bat """
                     docker-compose down || exit 0
                     docker rm -f comp_v_app || exit 0 
                     docker-compose up --build -d
         
-                    // Set the SLEEP_TIME environment variable in Docker container
-                    docker exec comp_v_app bash -c "export SLEEP_TIME=600 && python CVscript.py"
+                    // Run the script in the background inside the Docker container
+                    docker exec -d comp_v_app bash -c "export SLEEP_TIME=600 && nohup python CVscript.py &"
                 """
             }
         }
+
 
         stage('Release') {
             steps {
