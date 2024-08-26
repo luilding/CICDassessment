@@ -6,7 +6,7 @@ pipeline {
                 script {
                     // List and stop current deployments in one step
                     bat(script: '''
-                        for /f "tokens=*" %%i in ('aws deploy list-deployments --application-name YourApplicationName --deployment-group-name YourDeploymentGroupName --query "deployments[?status==\'InProgress\']" --output text') do (
+                        for /f "tokens=*" %%i in ('aws deploy list-deployments --application-name SIT753 --deployment-group-name SIT753deploymentgroup --query "deployments[?status==\'InProgress\']" --output text') do (
                             echo Stopping deployment: %%i
                             aws deploy stop-deployment --deployment-id %%i
                         )
@@ -33,7 +33,7 @@ pipeline {
                 script {
                     // Start a new deployment
                     bat '''
-                        aws deploy create-deployment --application-name YourApplicationName --deployment-group-name YourDeploymentGroupName --s3-location bucket=sit753bucket,key=my_application.zip,bundleType=zip --file-exists-behavior OVERWRITE
+                        aws deploy create-deployment --application-name SIT753 --deployment-group-name SIT753deploymentgroup --s3-location bucket=sit753bucket,bundleType=zip,key=my_application.zip --file-exists-behavior OVERWRITE
                     '''
                 }
             }
