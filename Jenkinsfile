@@ -66,7 +66,7 @@ pipeline {
                     docker rm -f comp_v_app || exit 0 
                     docker-compose up --build -d
         
-                    // Run the script in the background inside the Docker container
+
                     docker exec -d comp_v_app bash -c "export SLEEP_TIME=600 && nohup python CVscript.py &"
                 """
             }
