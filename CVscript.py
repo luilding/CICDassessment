@@ -51,5 +51,4 @@ print("Number of detected keypoints: %d" % (len(kp)))
 
 cv.imwrite("SIFT keypoints.png", img_gray_kp)
 
-print("Processing complete. Keeping the container running for 5 minutes...")
-time.sleep(600) 
+#time.sleep(600) 
