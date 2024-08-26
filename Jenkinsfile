@@ -4,7 +4,7 @@ pipeline {
         stage('Package') {
             steps {
                 script {
-                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts/run_script.sh -DestinationPath my_application.zip -Force'
+                    bat 'powershell Compress-Archive -Path CVscript.py,empire.jpg,appspec.yml,scripts -DestinationPath my_application.zip -Force'
                 }
             }
         }
