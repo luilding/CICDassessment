@@ -60,7 +60,7 @@ pipeline {
 
         stage('Deploy with Docker') {
             steps {
-                // Set the sleep time for Docker execution
+                // Set the sleep time for Docker execution and Set the SLEEP_TIME environment variable in Docker container
                 bat """
                     docker-compose down || exit 0
                     docker rm -f comp_v_app || exit 0 
