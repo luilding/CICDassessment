@@ -19,11 +19,13 @@ pipeline {
                 """
             }
         }
+
         stage('Archive Artifact') {
             steps {
                 archiveArtifacts artifacts: 'SIFT keypoints.png', allowEmptyArchive: false
             }
         }
+
         stage('Test') {
             steps {
                 bat """
@@ -37,6 +39,7 @@ pipeline {
                 }
             }
         }
+
         stage('Code Quality Analysis') {
             steps {
                 bat """
@@ -52,6 +55,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Build') {
             steps {
                 bat """
@@ -61,7 +65,9 @@ pipeline {
                 """
             }
         }
-steps {
+
+        stage('Deployment') {
+            steps {
                 script {
                     // Stop active deployments
                     bat '''
@@ -84,7 +90,6 @@ steps {
                 }
             }
         }
-    }
 
         stage('Monitoring and Alerting') {
             steps {
@@ -102,7 +107,7 @@ steps {
                     echo "Raw API Response:"
                     echo response
                     
-                    def jsonResponse = response.readLines().last() // Get the last line, which should be the JSON
+                    def jsonResponse = response.readLines().last() 
                     
                     def monitors = readJSON text: jsonResponse
                     def alertingMonitors = monitors.findAll { it.overall_state == 'Alert' }
